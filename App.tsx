@@ -1,29 +1,27 @@
 import React, {useState, type PropsWithChildren} from 'react';
 import {
-    ImageBackground,
-  SafeAreaView,
+  ImageBackground,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  TouchableHighlight,
+  TouchableOpacity,
   useColorScheme,
   View,
 } from 'react-native';
-
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import SafeAreaView from 'react-native-safe-area-view';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Octave from './src/components/Octave';
 import {notes} from './src/utils/helpers';
 import Sound from 'react-native-sound';
 import Piano from './src/Piano/Piano';
 import MidiNumbers from './src/Piano/MidiNumbers';
-import Slider from '@react-native-community/slider';
-
+// import Slider from '@react-native-community/slider';
+import styled from 'styled-components/native';
+import Notes from './src/components/PianoComponents/Note';
+import {Slider, Icon, Image} from '@rneui/themed';
+import Metronome from './src/components/Metronome';
 const Section: React.FC<
   PropsWithChildren<{
     title: string;
@@ -55,6 +53,27 @@ const Section: React.FC<
 };
 const firstNote = MidiNumbers.fromNote('c4');
 const lastNote = MidiNumbers.fromNote('e5');
+const Wraprer = styled.ScrollView`
+  height: 302px;
+  width: 400px;
+  margin: 10px auto;
+  padding: 20px 0 0 20px;
+  position: relative;
+  /* border: 1px solid #160801; */
+  border-radius: 16px;
+  flex-direction: row;
+  /* background-color: #833007; */
+  overflow: hidden;
+`;
+const Box = styled.View `
+    width: 70px;
+    height: 40px;
+    background-color: #eee;
+    border: 1px solid white;
+    margin-top: -15px;
+
+   padding: 0 10px
+`;
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -63,8 +82,19 @@ const App = () => {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
   const [music, setMusic] = useState(null);
-  const [position, setPosition] = useState<number>(0)
-   const pressHandle = note => {
+  const [position, setPosition] = useState<number>(0);
+  const interpolate = (start: number, end: number) => {
+    let k = (position - 0) / 10; // 0 =>min  && 10 => MAX
+    return Math.ceil((1 - k) * start + k * end) % 256;
+  };
+  console.log(position)
+  const color = () => {
+    let r = interpolate(255, 0);
+    let g = interpolate(0, 255);
+    let b = interpolate(0, 0);
+    return `rgb(${r},${g},${b})`;
+  };
+  const pressHandle = note => {
     let playNote = new Sound(`${note}.mp3`, Sound.MAIN_BUNDLE, err => {
       if (err) {
         console.log('ERR===', err);
@@ -78,55 +108,58 @@ const App = () => {
     });
     console.log('PLAYNOTE', playNote);
   };
-const image = {uri: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.dreamstime.com%2Froyalty-free-stock-photos-piano-keyboard-image18830568&psig=AOvVaw0XfVOdi52kbnxIlYs1NLv7&ust=1663819602616000&source=images&cd=vfe&ved=0CAwQjRxqFwoTCJDSj5aBpfoCFQAAAAAdAAAAABAD"}
+/* METRONOME */
+ //play with 80 bpm
 
+/* END */
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <View>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <ImageBackground source={image}   resizeMode="cover">
-      <Slider
-        style={{width: 400, height: 40, backgroundColor: '#EEEEEE'}}
-        minimumValue={0}
-        maximumValue={100}
-        minimumTrackTintColor="#EEEEEE"
-        maximumTrackTintColor="#EEEEEE"
-        thumbImage={{
-            uri: 'https://img.icons8.com/windows/50/000000/bus.png',
-          }}
-          trackImage={{
-            uri: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.dreamstime.com%2Froyalty-free-stock-photos-piano-keyboard-image18830568&psig=AOvVaw0XfVOdi52kbnxIlYs1NLv7&ust=1663819602616000&source=images&cd=vfe&ved=0CAwQjRxqFwoTCJDSj5aBpfoCFQAAAAAdAAAAABAD',
-          }}
-          value={0}
-        //   onSlidingComplete={value => {
-           
-          
-        //   }}
-          onValueChange={value => {
-            setPosition(value)
-            console.log(value)
-          }}
+      <View style={styles.wraper}>
+        <Slider
+          value={position}
+          style={styles.slider}
+          onValueChange={(value) =>setPosition(value)}
+          maximumValue={100}
+          minimumValue={1}
           step={1}
-        
-      />
-      </ImageBackground>
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Octave notes={notes} pressHandle={pressHandle} position={position} />
+          allowTouchTrack
+          trackStyle={{height: 50, width: 370 , backgroundColor: 'transparent'}}
+          thumbStyle={{height: 10, width: 0, backgroundColor: 'transparent'}}
+          thumbProps={{
+            children: (
+            <Box>
+            </Box>
+            ),
+          }}
+        />
+
+        <Wraprer horizontal={true} contentOffset={{x: position, y: 0}} >
+          {notes.map((item: any) => {
+            console.log(item.color);
+            return (
+              <Notes
+                key={item.note}
+                color={item.color}
+                note={item.note}
+                onPress={() => pressHandle(item.note)}
+              />
+            );
+          })}
+        </Wraprer>
+      </View>
+      <ScrollView>
+        {/* <Octave notes={notes} pressHandle={pressHandle} position={position} /> */}
+        <Metronome />
       </ScrollView>
-      {/* <Piano noteRange={{first: firstNote, last: lastNote}} width={300} /> */}
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
   sectionTitle: {
     fontSize: 24,
     fontWeight: '600',
@@ -139,11 +172,26 @@ const styles = StyleSheet.create({
   highlight: {
     fontWeight: '500',
   },
-  image: {
-    flex: 1,
-    justifyContent: "center",
-    height: 40,
-    width: 500
+  wraper: {
+    backgroundColor: '#7c7373',
+  },
+  slider: {
+    marginTop: 30,
+    marginBottom: 10,
+    marginLeft:10,
+    position: 'relative',
+    marginRight: 10,
+    width: 290
+  },
+  box: {
+    width: 70,
+    height: 10,
+    borderWidth: 2, 
+    borderColor: '#fff',
+    backgroundColor: '#eee',
+    position: 'absolute',
+    paddingBottom: 10,
+    paddingTop: 10,
   },
 });
 
