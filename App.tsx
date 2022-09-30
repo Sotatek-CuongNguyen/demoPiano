@@ -22,6 +22,7 @@ import styled from 'styled-components/native';
 import Notes from './src/components/PianoComponents/Note';
 import {Slider, Icon, Image} from '@rneui/themed';
 import Metronome from './src/components/Metronome';
+import AutoScrolling from './src/components/AutoScrolling';
 const Section: React.FC<
   PropsWithChildren<{
     title: string;
@@ -118,43 +119,8 @@ const App = () => {
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <View style={styles.wraper}>
-        <Slider
-          value={position}
-          style={styles.slider}
-          onValueChange={(value) =>setPosition(value)}
-          maximumValue={100}
-          minimumValue={1}
-          step={1}
-          allowTouchTrack
-          trackStyle={{height: 50, width: 370 , backgroundColor: 'transparent'}}
-          thumbStyle={{height: 10, width: 0, backgroundColor: 'transparent'}}
-          thumbProps={{
-            children: (
-            <Box>
-            </Box>
-            ),
-          }}
-        />
-
-        <Wraprer horizontal={true} contentOffset={{x: position, y: 0}} >
-          {notes.map((item: any) => {
-            console.log(item.color);
-            return (
-              <Notes
-                key={item.note}
-                color={item.color}
-                note={item.note}
-                onPress={() => pressHandle(item.note)}
-              />
-            );
-          })}
-        </Wraprer>
-      </View>
-      <ScrollView>
-        {/* <Octave notes={notes} pressHandle={pressHandle} position={position} /> */}
-        <Metronome />
-      </ScrollView>
+      <AutoScrolling />
+      
     </View>
   );
 };
