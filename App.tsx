@@ -1,5 +1,6 @@
-import React, {useState, type PropsWithChildren} from 'react';
+import React, {useCallback, useState, type PropsWithChildren} from 'react';
 import {
+  Dimensions,
   ImageBackground,
   ScrollView,
   StatusBar,
@@ -22,6 +23,10 @@ import styled from 'styled-components/native';
 import Notes from './src/components/PianoComponents/Note';
 import {Slider, Icon, Image} from '@rneui/themed';
 import Metronome from './src/components/Metronome';
+import ImagePicker from 'react-native-image-crop-picker';
+import DragAndDrop from './src/components/DragAndDrop';
+
+
 const Section: React.FC<
   PropsWithChildren<{
     title: string;
@@ -29,7 +34,7 @@ const Section: React.FC<
 > = ({children, title}) => {
   const isDarkMode = useColorScheme() === 'dark';
   return (
-    <View style={styles.sectionContainer}>
+    <View>
       <Text
         style={[
           styles.sectionTitle,
@@ -51,8 +56,6 @@ const Section: React.FC<
     </View>
   );
 };
-const firstNote = MidiNumbers.fromNote('c4');
-const lastNote = MidiNumbers.fromNote('e5');
 const Wraprer = styled.ScrollView`
   height: 302px;
   width: 400px;
@@ -65,14 +68,14 @@ const Wraprer = styled.ScrollView`
   /* background-color: #833007; */
   overflow: hidden;
 `;
-const Box = styled.View `
-    width: 70px;
-    height: 40px;
-    background-color: #eee;
-    border: 1px solid white;
-    margin-top: -15px;
+const Box = styled.View`
+  width: 70px;
+  height: 40px;
+  background-color: #eee;
+  border: 1px solid white;
+  margin-top: -15px;
 
-   padding: 0 10px
+  padding: 0 10px;
 `;
 
 const App = () => {
@@ -81,81 +84,63 @@ const App = () => {
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
-  const [music, setMusic] = useState(null);
-  const [position, setPosition] = useState<number>(0);
-  const interpolate = (start: number, end: number) => {
-    let k = (position - 0) / 10; // 0 =>min  && 10 => MAX
-    return Math.ceil((1 - k) * start + k * end) % 256;
+  //   const [music, setMusic] = useState(null);
+  //   const [position, setPosition] = useState<number>(0);
+  //   const interpolate = (start: number, end: number) => {
+  //     let k = (position - 0) / 10; // 0 =>min  && 10 => MAX
+  //     return Math.ceil((1 - k) * start + k * end) % 256;
+  //   };
+  //   console.log(position);
+  //   const color = () => {
+  //     let r = interpolate(255, 0);
+  //     let g = interpolate(0, 255);
+  //     let b = interpolate(0, 0);
+  //     return `rgb(${r},${g},${b})`;
+  //   };
+  //   const pressHandle = note => {
+  //     let playNote = new Sound(`${note}.mp3`, Sound.MAIN_BUNDLE, err => {
+  //       if (err) {
+  //         console.log('ERR===', err);
+  //         return;
+  //       }
+  //       playNote.play(success => {
+  //         console.log('Playing success', success);
+  //         console.log(note);
+  //         playNote.release();
+  //       });
+  //     });
+  //     console.log('PLAYNOTE', playNote);
+  //   };
+  // openHandle
+  const [images, setImage] = useState([]);
+  const openImagePicker = () => {
+    const imageList: any = [];
+    ImagePicker.openPicker({
+      multiple: true,
+      includeExif: true,
+      forceJpg: true,
+      compressImageQuality: 0.8,
+      maxFiles: 10,
+      includeBase64: true,
+    })
+      .then(res => {
+        console.log('res', res);
+        res.map(image => {
+          imageList.push({
+            pathname: image.path,
+            data: image.data,
+          });
+        });
+        setImage(imageList);
+      })
+      .catch(e => console.log('ERR', e.message));
   };
-  console.log(position)
-  const color = () => {
-    let r = interpolate(255, 0);
-    let g = interpolate(0, 255);
-    let b = interpolate(0, 0);
-    return `rgb(${r},${g},${b})`;
-  };
-  const pressHandle = note => {
-    let playNote = new Sound(`${note}.mp3`, Sound.MAIN_BUNDLE, err => {
-      if (err) {
-        console.log('ERR===', err);
-        return;
-      }
-      playNote.play(success => {
-        console.log('Playing success', success);
-        console.log(note);
-        playNote.release();
-      });
-    });
-    console.log('PLAYNOTE', playNote);
-  };
-/* METRONOME */
- //play with 80 bpm
-
-/* END */
+  console.log(images)
   return (
-    <View>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <View style={styles.wraper}>
-        <Slider
-          value={position}
-          style={styles.slider}
-          onValueChange={(value) =>setPosition(value)}
-          maximumValue={100}
-          minimumValue={1}
-          step={1}
-          allowTouchTrack
-          trackStyle={{height: 50, width: 370 , backgroundColor: 'transparent'}}
-          thumbStyle={{height: 10, width: 0, backgroundColor: 'transparent'}}
-          thumbProps={{
-            children: (
-            <Box>
-            </Box>
-            ),
-          }}
-        />
-
-        <Wraprer horizontal={true} contentOffset={{x: position, y: 0}} >
-          {notes.map((item: any) => {
-            console.log(item.color);
-            return (
-              <Notes
-                key={item.note}
-                color={item.color}
-                note={item.note}
-                onPress={() => pressHandle(item.note)}
-              />
-            );
-          })}
-        </Wraprer>
-      </View>
-      <ScrollView>
-        {/* <Octave notes={notes} pressHandle={pressHandle} position={position} /> */}
-        <Metronome />
-      </ScrollView>
-    </View>
+    <>
+     
+       <DragAndDrop />
+    </>
   );
 };
 
@@ -173,26 +158,66 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   wraper: {
-    backgroundColor: '#7c7373',
+    backgroundColor: '#c7c4c4',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   slider: {
     marginTop: 30,
     marginBottom: 10,
-    marginLeft:10,
+    marginLeft: 10,
     position: 'relative',
     marginRight: 10,
-    width: 290
+    width: 290,
   },
   box: {
     width: 70,
     height: 10,
-    borderWidth: 2, 
+    borderWidth: 2,
     borderColor: '#fff',
     backgroundColor: '#eee',
     position: 'absolute',
     paddingBottom: 10,
     paddingTop: 10,
   },
+  capturing: {
+    display: 'flex',
+    backgroundColor: '#d47777',
+    width: 100,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  capturingText: {
+    fontWeight: 'bold',
+    fontSize: 30,
+  },
+  capturingBtn: {
+    backgroundColor: '#f3b6b6',
+    alignItems: 'center',
+    paddingVertical: 0,
+    paddingHorizontal: 45,
+    borderRadius: 20,
+  },
+  rowItem: {
+    height: 100,
+    width: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'red'
+  },
+  text: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  boxTest:{
+    width: 50,
+    height: 50,
+    backgroundColor: 'red',
+    margin: 25
+  }
 });
 
 export default App;
