@@ -15,6 +15,7 @@ import Draggable from './Draggable';
 import ImagePicker from 'react-native-image-crop-picker';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
 import Pdf from 'react-native-pdf';
+import Gestures from 'react-native-easy-gestures-new';
 
 const {width, height} = Dimensions.get('window');
 const circleSize = width - 36;
@@ -29,7 +30,7 @@ const DragAndDrop = () => {
   const [items, setItems] = useState([]);
   const [imagePath, setImagePath] = useState([]);
   const [pdfSource, setPdfSource] = useState<any>();
- 
+  const [currentDeg, setCurrentDeg] = useState(180);
 
   useEffect(() => {
     setMovingDraggable(null);
@@ -148,20 +149,23 @@ const DragAndDrop = () => {
                 // }}
                 renderChild={isMovedOver => {
                   return (
-                    <View
-                      style={[
-                        isMovedOver && styles.moreThan10ItemMovedOver,
-                        styles.moreThan10Item,
-                      ]}>
-              
-                      <Image
+                    <Gestures
+                      rotate={`${currentDeg}deg`}
+                      draggable={false}
+                      scalable={true}
+                      rotatable={true}>
+                      <View
                         style={[
-                            styles.img,
-                        ]}
-                        source={{uri: item.pathname}}
-                        // style={}
-                      />
-                    </View>
+                          isMovedOver && styles.moreThan10ItemMovedOver,
+                          styles.moreThan10Item,
+                        ]}>
+                        <Image
+                          style={[styles.img]}
+                          source={{uri: item.pathname}}
+                          // style={}
+                        />
+                      </View>
+                    </Gestures>
                   );
                 }}
               />
@@ -176,23 +180,22 @@ const DragAndDrop = () => {
     <SafeAreaView style={styles.safeAreaView}>
       <StatusBar backgroundColor={'#20232A'} barStyle="light-content" />
       <View style={styles.viewContainer}>
-          {renderHeader()}
-          <ScrollView
-            scrollEnabled={!movingDraggable}
-            showsVerticalScrollIndicator={false}
-            alwaysBounceVertical={false}
-            contentContainerStyle={styles.scrollView}>
-            {renderIem()}
+        {renderHeader()}
+        <ScrollView
+          scrollEnabled={!movingDraggable}
+          showsVerticalScrollIndicator={false}
+          alwaysBounceVertical={false}
+          contentContainerStyle={styles.scrollView}>
+          {renderIem()}
 
-            {pdfSource && (
-              <Pdf
-                style={styles.pdf}
-                source={{uri: pdfSource}}
-                onError={error => Alert.alert(`${error}`)}
-              />
-            )}
-          </ScrollView>
-     
+          {pdfSource && (
+            <Pdf
+              style={styles.pdf}
+              source={{uri: pdfSource}}
+              onError={error => Alert.alert(`${error}`)}
+            />
+          )}
+        </ScrollView>
       </View>
     </SafeAreaView>
   );
@@ -224,7 +227,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     alignItems: 'center',
     paddingTop: 18,
-    backgroundColor: '#a36161',
+    backgroundColor: '#000000',
   },
   header: {
     width,
@@ -243,68 +246,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  lessThan10Container: {
-    flex: 1,
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: height * 0.2,
-  },
-  circleViewContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    flexWrap: 'wrap',
-    // padding: 16,
-  },
-  centerCircle: {
-    width: width / 3,
-    height: width / 3,
-    borderRadius: width / 1.5,
-    backgroundColor: '#ff4c6f',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 0,
-  },
-
-  lessThan10Item: {
-    width: 100,
-    height: itemSize,
-    overflow: 'hidden',
-    marginLeft: 10,
-  },
-  lessThan10ItemMovedOver: {
-    borderWidth: 6,
-    borderColor: '#FEDC33',
-  },
   img: {
     flex: 1,
-    width: 100,
-    height: 100,
+    width: '100%',
+    height: 300,
     resizeMode: 'cover',
     backgroundColor: 'red',
+    marginRight: 5,
   },
   moreThan10Container: {
     flex: 1,
     width: '100%',
     justifyContent: 'flex-start',
-    alignItems: 'center',
-    paddingBottom: height * 0.2,
+    alignItems: 'flex-start',
+    paddingBottom: 0,
   },
   squaresViewContainer: {
     flex: 1,
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     flexWrap: 'wrap',
-    padding: 16,
+    padding: 0,
   },
   moreThan10Item: {
     width: itemSize,
     height: itemSize,
-    borderRadius: 8,
-    margin: 6,
+    borderRadius: 0,
+    marginVertical: 6,
     overflow: 'hidden',
   },
   moreThan10ItemMovedOver: {

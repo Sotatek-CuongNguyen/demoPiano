@@ -25,6 +25,9 @@ import {Slider, Icon, Image} from '@rneui/themed';
 import Metronome from './src/components/Metronome';
 import ImagePicker from 'react-native-image-crop-picker';
 import DragAndDrop from './src/components/DragAndDrop';
+import Gestures from 'react-native-easy-gestures-new';
+import Horizontal from './src/components/DraList';
+import DraList from './src/components/DraList';
 
 
 const Section: React.FC<
@@ -112,7 +115,9 @@ const App = () => {
   //     console.log('PLAYNOTE', playNote);
   //   };
   // openHandle
-  const [images, setImage] = useState([]);
+  const [images, setImage] = useState<any>([]);
+  const [currentDeg, setCurrentDeg] = useState(90);
+
   const openImagePicker = () => {
     const imageList: any = [];
     ImagePicker.openPicker({
@@ -128,7 +133,7 @@ const App = () => {
         res.map(image => {
           imageList.push({
             pathname: image.path,
-            data: image.data,
+            data: image?.data,
           });
         });
         setImage(imageList);
@@ -138,11 +143,21 @@ const App = () => {
   console.log(images)
   return (
     <>
-     
-       <DragAndDrop />
+    {/* 
+      <Gestures rotate={`${currentDeg}deg`} draggable={true} scalable={false} rotatable={true}>
+       <View>
+       <Image style={styles.img} source={{uri: 'https://m.media-amazon.com/images/I/71U6KzJ2w-L._AC_SL1000_.jpg'}} />
+       </View>
+       </Gestures>
+       <DragAndDrop /> */}
+
+       {/* <DragAndDrop /> */}
+       <DraList />
+       <Text>aaa</Text>
     </>
   );
 };
+{/* <Image style={styles.img} source={{uri: 'https://m.media-amazon.com/images/I/71U6KzJ2w-L._AC_SL1000_.jpg'}} /> */}
 
 const styles = StyleSheet.create({
   sectionTitle: {
@@ -217,6 +232,10 @@ const styles = StyleSheet.create({
     height: 50,
     backgroundColor: 'red',
     margin: 25
+  },
+  img:{
+    width: 200,
+    height: 200
   }
 });
 
